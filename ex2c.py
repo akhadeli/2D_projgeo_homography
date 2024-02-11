@@ -53,7 +53,9 @@ class LineTracker:
         return np.cross(np.cross(l1, l2), np.cross(l3, l4))
     
     def errorLineToLine(self, y1, y2, y3, y4):
-        return np.dot(y1, np.cross(y3, y4)) + np.dot(y2, np.cross(y3, y4))
+        y3y4 = np.cross(y3, y4)
+        norm_y3y4 = y3y4/y3y4[2]
+        return np.dot(y1, norm_y3y4) + np.dot(y2, norm_y3y4)
     
     def start(self):
         if self.mode == PARALLEL_MODE:
@@ -118,7 +120,7 @@ class LineTracker:
         cv2.destroyAllWindows()
 
     def start_ltl(self):
-        cap = cv2.VideoCapture()
+        cap = cv2.VideoCapture(self.source)
 
         ret, frame0 = cap.read()
         if not ret:
@@ -139,6 +141,24 @@ class LineTracker:
             if not ret:
                 break
 
+            tracked_points = []
+            for tracker in self.trackers:
+                ret, bbox = tracker.update(frame)
+
+                if ret:
+                    center = self.getTrackerCenter(bbox)
+                    self.drawCircle(frame, [center[0], center[1]])
+                    tracked_points.append(center)
+            
+            tracked_points = np.concatenate((tracked_points, fixed_points), axis=0)
+            
+            if len(tracked_points) == 4:
+                ell = self.errorLineToLine(*tracked_points)
+                self.drawText(frame, 'ell:', (10,10), fontScale=0.5)
+                self.drawText(frame, f'norm:{str(ell)}', (10,40), fontScale=0.3)
+                for i in range(1, len(tracked_points), 2):
+                    self.drawLine(frame, (tracked_points[i-1][0], tracked_points[i-1][1]), (tracked_points[i][0], tracked_points[i][1]))
+
             cv2.imshow("line to line", frame)
 
             if self.save:
@@ -152,5 +172,5 @@ class LineTracker:
 
 
 if __name__ == "__main__":
-    o = LineTracker(PARALLEL_MODE, '2c_parallel_tilted.avi')
+    o = LineTracker(LTL_MODE, '2c_ltl.avi')
     o.start()
