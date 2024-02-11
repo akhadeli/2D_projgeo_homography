@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import mpl_toolkits
 import cv2
 
 # Points selected in following order:
@@ -9,7 +8,7 @@ import cv2
 # 2: bottom-right
 # 3: top-left
 
-class objectMidpoint:
+class ObjectMidpoint:
     def __init__(self, capture_source=0, patch_size=45, save=False, output_filename='output.avi'):
         self.source = capture_source
         self.patch_size = patch_size
@@ -103,5 +102,5 @@ class objectMidpoint:
         cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-    o = objectMidpoint('2b.mp4', save=True)
+    o = ObjectMidpoint('2b.mp4', save=True)
     o.start()
