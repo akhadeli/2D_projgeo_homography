@@ -27,34 +27,21 @@ class objectMidpoint:
         # x y 1
         for i, point in enumerate(points):
             bbox = (np.int32(point[0] - (self.patch_size-1)/2), np.int32(point[1] - (self.patch_size-1)/2), np.int32(self.patch_size), np.int32(self.patch_size))
-            print(bbox)
             self.trackers.append(cv2.TrackerKCF_create())
             self.trackers[i].init(frame, bbox)
 
 
     def calcMidpoint(self, points):
-        # top_left = np.array([bbox[0], bbox[1], 1])
-        # top_right = np.array([bbox[0]+bbox[2], bbox[1], 1])
-        # bottom_left = np.array([bbox[0], bbox[1]+bbox[3], 1])
-        # bottom_right = np.array([bbox[0]+bbox[2], bbox[1]+bbox[3], 1])
-
-
-
-        l1 = np.cross(points[3], points[2])
-        l2 = np.cross(points[1], points[0])
+        l1 = np.cross(points[0], points[1])
+        l2 = np.cross(points[2], points[3])
 
         x_m = np.cross(l1, l2)
 
         return np.array([x_m[0]/x_m[2], x_m[1]/x_m[2]], dtype=np.int32)
     
-    def calcVanish(self, bbox):
-        top_left = np.array([bbox[0], bbox[1], 1])
-        top_right = np.array([bbox[0]+bbox[2], bbox[1], 1])
-        bottom_left = np.array([bbox[0], bbox[1]+bbox[3], 1])
-        bottom_right = np.array([bbox[0]+bbox[2], bbox[1]+bbox[3], 1])
-
-        l3 = np.cross(top_left, top_right)
-        l4 = np.cross(bottom_right, bottom_left)
+    def calcVanish(self, points):
+        l3 = np.cross(points[0], points[2])
+        l4 = np.cross(points[1], points[3])
 
         x_inf = np.cross(l3, l4)
 
@@ -74,7 +61,6 @@ class objectMidpoint:
             writer = cv2.VideoWriter(self.output_filename, cv2.VideoWriter_fourcc(*'MJPG'), 20.0, (frame0.shape[1], frame0.shape[0]))
         
         points = self.getPoints(frame0)
-        print(points)
 
         self.initTrackers(frame0, points)
 
@@ -99,6 +85,12 @@ class objectMidpoint:
                 cv2.circle(frame, midpoint, 2, (0, 0, 255), 2)
                 cv2.line(frame, (tracked_points[0][0], tracked_points[0][1]), (tracked_points[1][0], tracked_points[1][1]), (255, 0, 0), 1)
                 cv2.line(frame, (tracked_points[2][0], tracked_points[2][1]), (tracked_points[3][0], tracked_points[3][1]), (255, 0, 0), 1)
+
+                try:
+                    vanish_point = self.calcVanish(tracked_points)
+                    cv2.line(frame, vanish_point, midpoint, (0, 255, 0), 1)
+                except:
+                    pass
 
             if self.save:
                 writer.write(frame)
