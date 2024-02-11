@@ -11,7 +11,7 @@ import cv2
 DLT = 1
 
 class HomographyEstimator:
-    def __init__(self, img_src1, img_src2, mode=DLT, num_points=4):
+    def __init__(self, img_src1, img_src2, mode=DLT, num_points=5):
         self.mode = mode
         self.img_src1 = img_src1
         self.img_src2 = img_src2
@@ -35,8 +35,6 @@ class HomographyEstimator:
         points_1 = self.getPoints(img1, self.num_points)
         points_2 = self.getPoints(img2, self.num_points)
 
-        H = cv2.getPerspectiveTransform(points_1[:, :2].astype(np.float32), points_2[:, :2].astype(np.float32))
-
         for i in range(self.num_points):
             top = np.hstack((np.zeros(3), -1 * points_2[i][2] * points_1[i], points_2[i][1] * points_1[i]))
             bottom = np.hstack((points_2[i][2] * points_1[i], np.zeros(3), -1 * points_2[i][0] * points_1[i]))
@@ -46,9 +44,6 @@ class HomographyEstimator:
         self.A = np.vstack(self.A)
         U, S, Vh = np.linalg.svd(self.A)
         h = np.reshape(Vh.T[:, -1], (3, 3))
-        print(H)
-        print(np.linalg.norm(h))
-        print(h)
         
         warped_img1 = cv2.warpPerspective(img1, h, (img1.shape[1], img1.shape[0]))
         warped_img2 = cv2.warpPerspective(img2, h, (img2.shape[1], img2.shape[0]))
