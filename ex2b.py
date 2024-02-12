@@ -9,7 +9,7 @@ import cv2
 # 3: top-left
 
 class ObjectMidpoint:
-    def __init__(self, capture_source=0, patch_size=45, save=False, output_filename='output.avi'):
+    def __init__(self, capture_source=0, patch_size=85, save=False, output_filename='output.avi'):
         self.source = capture_source
         self.patch_size = patch_size
         self.trackers = []
@@ -102,5 +102,5 @@ class ObjectMidpoint:
         cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-    o = ObjectMidpoint('2b.mp4', save=True)
+    o = ObjectMidpoint('2b_book.avi', save=True)
     o.start()

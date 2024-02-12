@@ -172,5 +172,11 @@ class LineTracker:
 
 
 if __name__ == "__main__":
-    o = LineTracker(PARALLEL_MODE, '2c_parallel_tilted.avi')
-    o.start()
+    t = LineTracker(PARALLEL_MODE, '2c_parallel_tilted.avi')
+    t.start()
+
+    p = LineTracker(PARALLEL_MODE, '2c_parallel.avi')
+    p.start()
+
+    l = LineTracker(LTL_MODE, '2c_ltl.avi')
+    l.start()
