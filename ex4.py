@@ -3,10 +3,12 @@ import matplotlib.pyplot as plt
 import cv2
 
 class AugmentedReality:
-    def __init__(self, cap_source, patch_size=85, num_points=4):
+    def __init__(self, cap_source, patch_size=85, num_points=4, save=False, output_filename='output.avi'):
         self.source = cap_source
         self.num_points = num_points
         self.patch_size = patch_size
+        self.save = save
+        self.output_filename = output_filename
         self.trackers = []
         self.A = []
 
@@ -53,8 +55,8 @@ class AugmentedReality:
         if not ret:
             return
             
-        # if self.save:
-        #     writer = cv2.VideoWriter(self.output_filename, cv2.VideoWriter_fourcc(*'MJPG'), 20.0, (frame0.shape[1], frame0.shape[0]))
+        if self.save:
+            writer = cv2.VideoWriter(self.output_filename, cv2.VideoWriter_fourcc(*'MJPG'), 20.0, (frame0.shape[1], frame0.shape[0]))
         
         points = self.getPoints(frame0, self.num_points)
 
@@ -114,17 +116,31 @@ class AugmentedReality:
                 template = cv2.remap(cv2.cvtColor(warped_img1, cv2.COLOR_BGR2GRAY), Xq.astype(np.float32), Yq.astype(np.float32), cv2.INTER_LINEAR)
                 
                 # print(np.array([(p[0], p[1]) for p in tracked_points], dtype=np.int32))
-                cv2.fillConvexPoly(frame, np.array([(tracked_points[0][0], tracked_points[0][1]), 
+                # frame[track] = frame + cv2.cvtColor(template, cv2.COLOR_GRAY2BGR)
+                mask = 255*np.ones(frame.shape[:2], dtype=np.uint8)
+                mask2 = np.zeros(frame.shape[:2], dtype=np.uint8)
+                cv2.fillConvexPoly(mask, np.array([(tracked_points[0][0], tracked_points[0][1]), 
                                                     (tracked_points[2][0], tracked_points[2][1]), 
                                                     (tracked_points[3][0], tracked_points[3][1]), 
                                                     (tracked_points[1][0], tracked_points[1][1])], dtype=np.int32), 0, 16)
+                cv2.fillConvexPoly(mask2, np.array([(tracked_points[0][0], tracked_points[0][1]), 
+                                                    (tracked_points[2][0], tracked_points[2][1]), 
+                                                    (tracked_points[3][0], tracked_points[3][1]), 
+                                                    (tracked_points[1][0], tracked_points[1][1])], dtype=np.int32), (255,255,255), 16)
                 
-                # frame[track] = frame + cv2.cvtColor(template, cv2.COLOR_GRAY2BGR)
-                frame = cv2.addWeighted(frame, 0.7, warped_img1, 0.3, 0.0)
+                # mask = np.where(frame == 0, 1, 0).astype(np.float32)
+                # b_frame = frame * (1-mask)
+                frame = cv2.bitwise_and(frame, frame, mask=mask)
+                warped_img1 = cv2.bitwise_and(warped_img1, warped_img1, mask=mask2)
+                frame += warped_img1
+
+                # frame = cv2.addWeighted(frame, 0.7, warped_img1, 0.3, 0.0)
                 # frame[] = cv2.cvtColor(template, cv2.COLOR_GRAY2BGR)
-                cv2.imshow("template", template)
+                # cv2.imshow("template", warped_img1)
 
             cv2.imshow("AR", frame)
+            if self.save:
+                writer.write(frame)
             key = cv2.waitKey(1)
             if key == 27:
                 break
@@ -132,7 +148,7 @@ class AugmentedReality:
         cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-    o = AugmentedReality(0)
+    o = AugmentedReality(0, save=True)
     o.start()
 
 
