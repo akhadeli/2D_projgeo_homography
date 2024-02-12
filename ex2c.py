@@ -103,7 +103,7 @@ class LineTracker:
 
                 epar = self.errorParallel(l1, l2, l3, l4)
                 self.drawText(frame, 'epar:', (10,10), fontScale=0.5)
-                self.drawText(frame, f'norm:{str(np.linalg.norm(epar[:2]/epar[2]))}', (10,40), fontScale=0.3)
+                self.drawText(frame, f'magnitude:{str(np.linalg.norm(epar[:2]/epar[2], 2))}', (10,40), fontScale=0.3)
 
                 for i in range(1, len(tracked_points), 2):
                     self.drawLine(frame, (tracked_points[i-1][0], tracked_points[i-1][1]), (tracked_points[i][0], tracked_points[i][1]))
@@ -155,7 +155,7 @@ class LineTracker:
             if len(tracked_points) == 4:
                 ell = self.errorLineToLine(*tracked_points)
                 self.drawText(frame, 'ell:', (10,10), fontScale=0.5)
-                self.drawText(frame, f'norm:{str(ell)}', (10,40), fontScale=0.3)
+                self.drawText(frame, f'value:{str(ell)}', (10,40), fontScale=0.3)
                 for i in range(1, len(tracked_points), 2):
                     self.drawLine(frame, (tracked_points[i-1][0], tracked_points[i-1][1]), (tracked_points[i][0], tracked_points[i][1]))
 
@@ -164,7 +164,7 @@ class LineTracker:
             if self.save:
                 writer.write(frame)
 
-            key = cv2.waitKey(30)
+            key = cv2.waitKey(20)
             if key == 27:
                 break
 
@@ -172,11 +172,14 @@ class LineTracker:
 
 
 if __name__ == "__main__":
-    t = LineTracker(PARALLEL_MODE, '2c_parallel_tilted.avi')
-    t.start()
+    # t = LineTracker(PARALLEL_MODE, '2c_parallel_tilted.avi')
+    # t.start()
 
-    p = LineTracker(PARALLEL_MODE, '2c_parallel.avi')
-    p.start()
+    # p = LineTracker(PARALLEL_MODE, '2c_parallel.avi')
+    # p.start()
 
-    l = LineTracker(LTL_MODE, '2c_ltl.avi')
-    l.start()
+    m = LineTracker(PARALLEL_MODE, '2c_parallel_moving.avi')
+    m.start()
+
+    # l = LineTracker(LTL_MODE, '2c_ltl.avi')
+    # l.start()

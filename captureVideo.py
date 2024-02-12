@@ -8,7 +8,7 @@ cap = cv2.VideoCapture(0)
 ret, frame0 = cap.read()
 print(frame0.shape)
 
-writer = cv2.VideoWriter('2b_book.avi', cv2.VideoWriter_fourcc(*'MJPG'), 30.0, (frame0.shape[1], frame0.shape[0]))
+writer = cv2.VideoWriter('out.avi', cv2.VideoWriter_fourcc(*'MJPG'), 30.0, (frame0.shape[1], frame0.shape[0]))
 
 timer = 0
 
